@@ -1,4 +1,4 @@
-*Version 0.1.1 of MQtime
+*Version 0.2 of MQtime
 *Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup.
 *Written by John Voorheis, University of Oregon
 *Email jlv@uoregon.edu with and comments or concerns
@@ -18,7 +18,6 @@ program MQtime
 		cap gen distance = .
 		cap gen fuelUsed = .
 		cap gen service = "OSM"
-		
 		if "`in'" == ""{
 		forval i = 1/`cnt'{
 			local cnt = _N
