@@ -2,6 +2,8 @@
 *Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup.
 *Written by John Voorheis, University of Oregon
 *Email jlv@uoregon.edu with and comments or concerns
+
+
 program MQtime
 	version 12
 	syntax, start_x(string) start_y(string) end_x(string) end_y(string)
