@@ -43,7 +43,7 @@ program MQtime
 				replace distance = . in `i'
 				replace service = "No Cars Go"
 			}
-			else if errorcode[1] == "500{
+			else if errorcode[1] == "500"{
 				sleep 500
 				insheetjson temp_time temp_distance errorcode temp_fuel using "`api_request'", columns("route:formattedTime" "route:distance" "info:statuscode" "route:fuelUsed") flatten replace
 			}
