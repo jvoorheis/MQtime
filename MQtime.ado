@@ -1,13 +1,13 @@
-*Version 0.2 of MQtime
+*Version 0.2.1 of MQtime
 *Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup.
 *Written by John Voorheis, University of Oregon
-*Email jlv@uoregon.edu with and comments or concerns
+*Email jlv@uoregon.edu with any comments or concerns
 
 
 program MQtime
-	version 12
-	syntax [in], start_x(string) start_y(string) end_x(string) end_y(string) 
-	quietly {
+	version 11
+	syntax [in], start_x(string) start_y(string) end_x(string) end_y(string) [km api_key(string)]
+	qui {
 		cap which insheetjson
 		if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"
 		if _rc == 111 assert 1==2
@@ -19,27 +19,44 @@ program MQtime
 		cap gen fuelUsed = .
 		cap gen service = "OSM"
 		if "`in'" == ""{
+		local cnt = _N
 		forval i = 1/`cnt'{
-			local cnt = _N
+			
 			local sx = `start_x'[`i']
 			local sy = `start_y'[`i']
 			local ex = `end_x'[`i'] 
 			local ey = `end_y'[`i']
 			local start_coords = string(`sy')+","+string(`sx')
 			local end_coords = string(`ey')+","+string(`ex')
-			local api_request = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
-			local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+			if ("`km'"=="km") & ("`api_key'"==""){
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"
+			}
+			else if ("`km'"=="km") & ("`api_key'"~=""){
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"			
+			}
+			else if ("`km'"=="") & ("`api_key'"~=""){
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+			}
+			else{
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+			}
 			cap gen str240 temp_time = ""
 			cap gen str240 temp_distance = ""
 			cap gen str240 errorcode = ""
 			cap gen str240 temp_fuel = ""
+			
 			insheetjson temp_time temp_distance errorcode temp_fuel using "`api_request'", columns("route:formattedTime" "route:distance" "info:statuscode" "route:fuelUsed") flatten replace
+			*noisily di errorcode[1]
 			if errorcode[1] == "601" | errorcode[1] == "602" | errorcode[1] == "603" | errorcode[1] == "610" {
 				insheetjson temp_time temp_distance errorcode temp_fuel using "`mp_api_request'", columns("route:formattedTime" "route:distance" "info:statuscode" "route:fuelUsed") flatten replace
 				if errorcode[1] == "400" {
 					replace travel_time = . in `i'
 					replace distance = . in `i'
-					replace service = "No Cars Go" in `i'
+					replace service = "Route Failed" in `i'
 					noisily: di "Processed " `i'
 				}
 				else{
@@ -57,7 +74,7 @@ program MQtime
 			else if errorcode[1] == "400" {
 				replace travel_time = . in `i'
 				replace distance = . in `i'
-				replace service = "No Cars Go" in `i'
+				replace service = "Route Failed" in `i'
 				noisily: di "Processed " `i' " of " `cnt'
 			}
 			else if errorcode[1] == "500"{
@@ -93,21 +110,35 @@ program MQtime
 		local cnt = placeholder2[1]
 		drop placeholder placeholder1 placeholder2
 		*
-		forval i = `2'{
-			noisily 
+		forval i = `2'{ 
 			local sx = `start_x'[`i']
 			local sy = `start_y'[`i']
 			local ex = `end_x'[`i'] 
 			local ey = `end_y'[`i']
 			local start_coords = string(`sy')+","+string(`sx')
 			local end_coords = string(`ey')+","+string(`ex')
-			local api_request = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
-			local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+			if ("`km'"=="km") & ("`api_key'"==""){
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"
+			}
+			else if ("`km'"=="km") & ("`api_key'"~=""){
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'&unit=k"			
+			}
+			else if ("`km'"=="") & ("`api_key'"~=""){
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=" + "`api_key'" + "&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+			}
+			else{
+				local api_request = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+				local mp_api_request = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=" + "`start_coords'" + "&to=" + "`end_coords'"+"&outFormat='json'"
+			}
 			cap gen str240 temp_time = ""
 			cap gen str240 temp_distance = ""
 			cap gen str240 errorcode = ""
 			cap gen str240 temp_fuel = ""
 			insheetjson temp_time temp_distance errorcode temp_fuel using "`api_request'", columns("route:formattedTime" "route:distance" "info:statuscode" "route:fuelUsed") flatten replace
+			*noisily di errorcode[1]
 			if errorcode[1] == "601" | errorcode[1] == "602" | errorcode[1] == "603" | errorcode[1] == "610" {
 				insheetjson temp_time temp_distance errorcode temp_fuel using "`mp_api_request'", columns("route:formattedTime" "route:distance" "info:statuscode" "route:fuelUsed") flatten replace
 				if errorcode[1] !="0" {
