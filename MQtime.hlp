@@ -1,0 +1,62 @@
+{smcl}
+{* *! version 0.2  15oct2013}{...}
+{viewerjumpto "Syntax" "examplehelpfile##syntax"}{...}
+{viewerjumpto "Description" "examplehelpfile##description"}{...}
+{viewerjumpto "Options" "examplehelpfile##options"}{...}
+{viewerjumpto "Remarks" "examplehelpfile##remarks"}{...}
+{viewerjumpto "Examples" "examplehelpfile##examples"}{...}
+{title:Title}
+
+{phang}
+{bf: MQtime} {hline 2} Calculate driving distance and travel time using the Mapquest API
+
+
+{marker syntax}{...}
+{title:Syntax}
+
+{p 8 17 2}
+{cmd:MQtime}[in}]{cmd:,}
+{cmd:start_x(}{it:varname}{cmd:)}
+{cmd:start_y(}{it:varname}{cmd:)} 
+{cmd:end_x(}{it:varname}{cmd:)} 
+{cmd:end_y(}{it:varname}{cmd:)}  
+
+
+{marker description}{...}
+{title:Description}
+{p 4 4 2} {cmd:MQtime} uses the Mapquest API to calculate distances, travel times and estimated fuel used for a pair of locations. {cmd:start_x()}, {cmd:start_y()}, {cmd:end_x()}, and {cmd:end_y()} must contain the latitude/longitude information for the origin and destination. There are actually two Mapquest Directions API's: the OpenAPI, which uses the OpenStreetmaps database to generate directions, and the proprietary Mapquest API, which uses the commercial Mapquest service. {cmd: MQtime} uses the OpenAPI by default, since the terms of use are much more permissive. However, in limited testing, the OpenAPI returned errors for about 2% of requested routes. If this occurs, {cmd:MQtime} will query the commercial API. If the commercial API returns an error, {cmd:MQtime} will return missing values. The OpenAPI does not systematically limit the number of queries per API key, however the commercial Mapquest service limits queries to 5000 per day per API key. {cmd:MQtime} has a Mapquest API key associated with it, however, for applications that require the processing of a large number of locations that require the commercial service, users can supply their own API key (keys can be requested at http://developer.mapquest.com/web/info/account/app-keys). 
+
+{p 4 4 2} {cmd:MQtime} generates four variables by default: {cmd:travel_time}, which contains the driving time between locations in minutes, {cmd:distance}, which contains the driving distance between locations in miles, and {cmd:fuelUsed}, which contains Mapquest's estimate of fuel usage for the trip, and {cmd:service}, which returns either "OSM" or "Mapquest", depending on the API service used. It is possible to generate distance in kilometers, and to supply actual fuel economy to the API, but this is not yet implemented.
+
+{p 4 4 2} {cmd:MQtime} depends on two user written Stata libraries, {help libjson:libjson} and {help insheetjson: insheetjson}, for the processing of the JSON objects returned by the Mapquest API. These will need to be installed before using {cmd:MQtime}, which can be be done via ssc:
+{pstd}
+{stata ssc install libjson}
+{pstd}
+{stata ssc install insheetjson}
+
+
+
+
+{marker options}{...}
+{dlgtab:Main}
+{syntab:{it:Required}...}
+{phang}
+{phang} {cmd:start_x(}{it:varname}{cmd:)} and {cmd:start_y(}{it:varname}{cmd:)} specify the longitude (x) and latitude (y), in degrees, of the origin location.
+
+{phang} {cmd:end_x(}{it:varname}{cmd:)} and {cmd:end_y(}{it:varname}{cmd:)} specify the longitude (x) and latitude (y), in degrees, of the destination location.
+
+
+
+{marker examples}{...}
+{title:Examples}
+
+{phang}{cmd:. MQtime, start_x(s_x) start_y(s_y) end_x(e_x) end_y(e_y)}{p_end}
+{phang}{cmd:. MQtime in 1/10, start_x(s_x) start_y(s_y) end_x(e_x) end_y(e_y)}{p_end}
+
+{marker Author}
+{title: Author}
+{pstd}John Voorheis
+{pstd}Department of Economics
+{pstd}Universityt of Oregon
+{pstd} Eugene, OR
+{pstd}jlv@uoregon.edu
