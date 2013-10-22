@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage[margin=1in]{geometry}
+\usepackage{epstopdf}
+\usepackage{ctable}
+\usepackage{appendix}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{dcolumn}
+\usepackage{bbm}
+\usepackage{subfig}
+\usepackage{setspace}
+
+\title{MQtime: A Tool For Calculating Travel Time and Distance in Stata}
+\author{John Voorheis}
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note describes a new Stata library which provides functionality to calculate driving distance and travel time using an overlooked  mapping API provided by Mapquest, which has much more attractive terms of use for researchers than comparable alternatives. 
+\end{abstract}
+
+In a variety of applications, the distance between two locations can be a crucial bit of data. There are a number of ways of calculating said distances, which have varying degrees of realism. One can, for instance, calculate a straight line distance between two points given latitude and longitude coordinates. If one is modeling transportation, however, the straight line distance may be quite different from the actual distance traveled e.g. by car or bicycle. Calculating the true driving distance, however, is a much more complex task than calculating straight line distance. 
+\\ \\
+One way to complete this task is to make use of third party mapping services. Indeed, the TRAVELTIME library (written by Adam Ozimek and Daniel Miles) was written to do this exactly, using Google's Maps service. Unfortunately, Google recently moved to a new version their API (application programming interface) and this change has broken TRAVELTIME's functionality. In the mean time, there has been no off the shelf solution available for Stata using either the new Google Maps API or another mapping service. Additionally, even before the API change, Google had implemented restrictions which limited the number of requests that a researcher could make to a few thousand per day.
+\\ \\
+MQtime is an attempt to provide just this sort of off the shelf travel time calculation functionality without the disadvantages associated with tools that utilize the Google Maps API. This is accomplished by taking advantage of an otherwise overlooked service provided by MapQuest. MapQuest provides an API that accesses its commercial mapping service (the same service one would access through www.mapquest.com) which has similar rate limits to thouse imposed by Google. However, Mapquest also provides a second API which accesses the OpenStreetmaps service, and imposes no preset limits on queries to this API. The OpenStreetmaps (OSM hereafter) project is a partially crowdsourced project to make a publicly available, open-source street map covering as much of the world as possible. More information about the OSM project can be found at 
+http://www.openstreetmap.org. 
+\\ \\
+
+\end{document}
