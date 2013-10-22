@@ -1,5 +1,8 @@
 *Version 0.3 of MQtime (updated 10/17/13)
-*Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup.
+*Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup
+*This nods towards TRAVELTIME, written by Adam Ozimek and Daniel Miles in syntax, and very loosely in structure. 
+*This uses the INSHEETJSON library to parse the API requests.
+*Any mistakes are my own.
 *Written by John Voorheis, University of Oregon
 *Email jlv@uoregon.edu with any comments or concerns
 
