@@ -1,4 +1,4 @@
-*Version 0.3 of MQtime (updated 10/17/13)
+*Version 0.3.1 of MQtime (updated 10/30/13)
 *Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup
 *This nods towards TRAVELTIME, written by Adam Ozimek and Daniel Miles in syntax, and very loosely in structure. 
 *This uses the INSHEETJSON library to parse the API requests.
@@ -9,7 +9,7 @@
 
 program MQtime
 	version 11
-	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string) km api_key(string) mode(string)]
+	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string) api_key(string) km mode(string)]
 	qui {
 		cap which insheetjson
 		if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"
@@ -21,8 +21,6 @@ program MQtime
 		cap gen distance = .
 		cap gen fuelUsed = .
 		cap gen service = "OSM"
-		if "`in'" == ""{
-		local cnt = _N
 		if "`api_key'"==""{
 			local osm_url1 = "http://open.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from="
 			local mq_url1 = "http://www.mapquestapi.com/directions/v1/route?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from="
@@ -41,35 +39,38 @@ program MQtime
 		}
 		else if ("`mode'"=="walking"){
 			if ("`km'"==""){
-				local options = "&outFormat='json'&narrativeType=none&routeType='pedestrian'"
+				local options = "&outFormat='json'&narrativeType=none&routeType=pedestrian"
 			}
 			else{
-				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType='pedestrian'"
+				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType=pedestrian"
 			}
 		}
 		else if ("`mode'"=="bicycle"){
 			if ("`km'"==""){
-				local options = "&outFormat='json'&narrativeType=none&routeType='bicycle'"
+				local options = "&outFormat='json'&narrativeType=none&routeType=bicycle"
 			}
 			else{
-				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType='bicycle'"
+				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType=bicycle"
 			}
 		}
 		else if ("`mode'"=="transit"){
 			if ("`km'"==""){
-				local options = "&outFormat='json'&narrativeType=none&routeType='multimodal'"
+				local options = "&outFormat='json'&narrativeType=none&routeType=multimodal"
 			}
 			else{
-				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType='multimodal'"
+				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType=multimodal"
 			}
 		} 
+		if "`in'" == ""{
+		local cnt = _N
+		
 		forval i = 1/`cnt'{
-			if "`start_add'"=="" & "`start_x'"!=""{
+			if "`start_x'"!="" & "`start_add'"==""{
 				local sx = `start_x'[`i']
 				local sy = `start_y'[`i']
 				local start_coords = string(`sy')+","+string(`sx')
 			}
-			else if "`start_add'" !="" & "`start_x'"==""{
+			else if "`start_x'"=="" & "`start_add'"!=""{
 				local temp1 = `start_add'[`i']
 				local start_coords = subinstr("`temp1'", " ", "%20", .)
 			}
@@ -77,12 +78,12 @@ program MQtime
 				noisily display "You must specify either x,y coordinates or an string address for both origin and destination"
 				assert 1==2
 			}
-			if "`'end_add'"=="" & "`end_x'"!=""{
+			if "`'end_x'"!="" & "`end_add'"==""{
 				local ex = `end_x'[`i'] 
 				local ey = `end_y'[`i']
 				local end_coords = string(`ey')+","+string(`ex')
 			}
-			else if "`end_add'"!="" & "`end_x'"==""{
+			else if "`end_x'"=="" & "`end_add'"!=""{
 				local temp1 = `end_add'[`i']
 				local end_coords = subinstr("`temp1'", " ", "%20", .)
 			}
@@ -98,7 +99,7 @@ program MQtime
 			cap gen str240 temp_distance = ""
 			cap gen str240 errorcode = ""
 			cap gen str240 temp_fuel = ""
-			noisily di "`api_request'"
+			*noisily di "`api_request'"
 			insheetjson temp_time temp_distance errorcode temp_fuel using "`api_request'", columns("route:formattedTime" "route:distance" "info:statuscode" "route:fuelUsed") flatten replace
 			
 			*noisily di errorcode[1]
@@ -162,12 +163,12 @@ program MQtime
 		drop placeholder placeholder1 placeholder2
 		*
 		forval i = `2'{ 
-			if "`start_add'"=="" & "`start_x'"!=""{
+			if "`start_x'"!="" & "`start_add'"==""{
 				local sx = `start_x'[`i']
 				local sy = `start_y'[`i']
 				local start_coords = string(`sy')+","+string(`sx')
 			}
-			else if "`start_add'" !="" & "`start_x'"==""{
+			else if "`start_x'"=="" & "`start_add'"!=""{
 				local temp1 = `start_add'[`i']
 				local start_coords = subinstr("`temp1'", " ", "%20", .)
 			}
@@ -175,12 +176,12 @@ program MQtime
 				noisily display "You must specify either x,y coordinates or an string address for both origin and destination"
 				assert 1==2
 			}
-			if "`'end_add'"=="" & "`end_x'"!=""{
+			if "`'end_x'"!="" & "`end_add'"==""{
 				local ex = `end_x'[`i'] 
 				local ey = `end_y'[`i']
 				local end_coords = string(`ey')+","+string(`ex')
 			}
-			else if "`end_add'"!="" & "`end_x'"==""{
+			else if "`end_x'"=="" & "`end_add'"!=""{
 				local temp1 = `end_add'[`i']
 				local end_coords = subinstr("`temp1'", " ", "%20", .)
 			}
@@ -189,7 +190,8 @@ program MQtime
 				assert 1==2
 			}
 			
-			local api_request = "`osm_url1'" + "`start_coords'" + "&to=" + "`end_coords'"+"`options'"
+			local api_request = "`osm_url1'" + "`start_coords'" + "&to=" + "`end_coords'"+ "`options'"
+			*noisily di "`api_request'"
 			local mp_api_request = "`mq_url1'" + "`start_coords'" + "&to=" + "`end_coords'"+"`options'"
 			cap gen str240 temp_time = ""
 			cap gen str240 temp_distance = ""
