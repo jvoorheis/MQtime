@@ -9,7 +9,7 @@
 
 program MQtime
 	version 11
-	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string) api_key(string) km mode(string)]
+	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string)api_key(string) km mode(string)]
 	qui {
 		cap which insheetjson
 		if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"
@@ -78,7 +78,7 @@ program MQtime
 				noisily display "You must specify either x,y coordinates or an string address for both origin and destination"
 				assert 1==2
 			}
-			if "`'end_x'"!="" & "`end_add'"==""{
+			if "`end_x'"!="" & "`end_add'"==""{
 				local ex = `end_x'[`i'] 
 				local ey = `end_y'[`i']
 				local end_coords = string(`ey')+","+string(`ex')
@@ -176,7 +176,7 @@ program MQtime
 				noisily display "You must specify either x,y coordinates or an string address for both origin and destination"
 				assert 1==2
 			}
-			if "`'end_x'"!="" & "`end_add'"==""{
+			if "`end_x'"!="" & "`end_add'"==""{
 				local ex = `end_x'[`i'] 
 				local ey = `end_y'[`i']
 				local end_coords = string(`ey')+","+string(`ex')
