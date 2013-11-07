@@ -14,9 +14,12 @@
 \usepackage{bbm}
 \usepackage{subfig}
 \usepackage{setspace}
+\usepackage[affil-it]{authblk}
+
 
 \title{MQtime: A Tool For Calculating Travel Time and Distance in Stata}
-\author{John Voorheis}
+\author{John Voorheis\thanks{Thanks to Sonja Kolstoe and Jason Query for providing datasets and testing, to Trudy Cameron for encouragement and general awesomeness. None of this would be possible without Adam Ozimek and Daniel Miles (for writing the original TRAVELTIME) and Erik Lindsley (for writing INSHEETJSON). All mistakes are my own.}}
+\affil{University of Oregon}
 \date{\today}
 
 
@@ -24,15 +27,129 @@
 \maketitle
 
 \begin{abstract}
-This note describes a new Stata library which provides functionality to calculate driving distance and travel time using an overlooked  mapping API provided by Mapquest, which has much more attractive terms of use for researchers than comparable alternatives. 
+This note describes a new Stata library which provides functionality to calculate driving distance and travel time using an overlooked free (as in speech and beer)  and open-source mapping API provided by Mapquest, which has much more attractive terms of use for researchers than comparable alternatives. We also provide a convenience function for geocoding or reverse geocoding string geographic data. 
 \end{abstract}
 
+\section{Introduction}
 In a variety of applications, the distance between two locations can be a crucial bit of data. There are a number of ways of calculating said distances, which have varying degrees of realism. One can, for instance, calculate a straight line distance between two points given latitude and longitude coordinates. If one is modeling transportation, however, the straight line distance may be quite different from the actual distance traveled e.g. by car or bicycle. Calculating the true driving distance, however, is a much more complex task than calculating straight line distance. 
 \\ \\
-One way to complete this task is to make use of third party mapping services. Indeed, the TRAVELTIME library (written by Adam Ozimek and Daniel Miles) was written to do this exactly, using Google's Maps service. Unfortunately, Google recently moved to a new version their API (application programming interface) and this change has broken TRAVELTIME's functionality. In the mean time, there has been no off the shelf solution available for Stata using either the new Google Maps API or another mapping service. Additionally, even before the API change, Google had implemented restrictions which limited the number of requests that a researcher could make to a few thousand per day.
+One way to complete this task is to make use of third party mapping services. Indeed, the TRAVELTIME library (written by Adam Ozimek and Daniel Miles) was written to do this exactly, using Google's Maps service. Unfortunately, Google recently moved to a new version their API (application programming interface) and this change has obviated TRAVELTIME's approach. In the mean time, there has been no off the shelf solution available for Stata using either the new Google Maps API or another mapping service. Additionally, even before the API change, Google had implemented restrictions which limited the number of requests that a researcher could make to a few thousand per day.
 \\ \\
-MQtime is an attempt to provide just this sort of off the shelf travel time calculation functionality without the disadvantages associated with tools that utilize the Google Maps API. This is accomplished by taking advantage of an otherwise overlooked service provided by MapQuest. MapQuest provides an API that accesses its commercial mapping service (the same service one would access through www.mapquest.com) which has similar rate limits to thouse imposed by Google. However, Mapquest also provides a second API which accesses the OpenStreetmaps service, and imposes no preset limits on queries to this API. The OpenStreetmaps (OSM hereafter) project is a partially crowdsourced project to make a publicly available, open-source street map covering as much of the world as possible. More information about the OSM project can be found at 
+MQtime is an attempt to provide just this sort of off the shelf travel time calculation functionality without the disadvantages associated with tools that utilize the Google Maps API. This is accomplished by taking advantage of an otherwise overlooked service provided by MapQuest. MapQuest provides an API that accesses its commercial mapping service (the same service one would access through www.mapquest.com) which has similar rate limits to those imposed by Google. However, Mapquest also provides a second API which accesses the OpenStreetmaps service, and imposes no preset limits on queries to this API. The OpenStreetmaps (OSM hereafter) project is a partially crowdsourced project to make a publicly available, open-source street map covering as much of the world as possible. More information about the OSM project can be found at 
 http://www.openstreetmap.org. 
 \\ \\
+MQtime (and the associated helper function MQgeocode) are written to mimic the syntax of Traveltime, in order to ease the learning curve for users who are familiar with the tool. The under-the-hood functionality of making the API requests and then parsing them into a format that is Stata-readable differs significantly. The Insheetjson library provides functionality to parse the sort of data object (a JSON object) returned by the Mapquest service\footnote{It should be noted that the APIs are written with web-oriented languages like Javascript and Python in mind; in fact, it is trivially easy to write a Python script which accomplishes the same thing as MQtime.}. The approach in MQtime is then easily extensible to other similar API services, which are increasingly provided by companies, and are an underutilized resource for economists. 
+\\ \\
+\section{The MQgeocode Command}
+Although the Openstreetmaps API will take as input either text address information or latitude/longitude coordinates, users may wish to generate latitudes/longitudes from a text address for other purposes (e.g. for calculating crow-flies distances.) This can be accomplished with, e.g. ArcGIS or the equivalent rather easily, but doing so requires leaving the comfortable confines of Stata. MQgeocode is provided as a convenience function. Unlike the MQtime command (see next section), the MQgeocode command makes use of only the OpenStreetmaps API, although it is easily modified to use the commercial API.
+
+\subsection{Syntax}
+\begin{verbatim}
+MQgeocode [in], [address(string) lat(string) long(string) outaddress(string)]
+\end{verbatim}
+
+\subsection{Options}
+\verb|address|(\textit{string}) specifies the variable holding the plain text addresses (e.g. "Eugene, OR") to be geocoded. Cannot be combined with options \verb|lat| and \verb|long|
+\\ \\
+\verb|lat|(\textit{string}) and \verb|long|(\textit{string}) specifies the variables holding the latitude and longitudes to be reverse geocoded. Cannot be combined with option \verb|address|
+\\ \\
+\verb|outaddress|(\textit{string}) specifies the variable name to be used for the output, which will be either a plain text string ("Ann Arbor, MI") or a string holding a latitude, longitude pair ("45.52,-122.71")
+
+\subsection{Remarks}
+Traditional geocoding is relatively straightforward - it requires only that the user has created a variable holding the full text addresses. If a user has separate variables for , e.g. City and State, concatenating them is trivial, using, e.g.
+
+ \begin{center}\verb|gen |\textit{newvar} \verb|= |\textit{cityvar} \verb|+ "," +| \textit{statevar} \end{center} 
+In general, \verb|MQgeocode| will do only basic string formatting (most importantly replacing spaces with \verb|%20|), so the user will need to ensure that there are no disallowed characters or spelling errors. The API is permissive in terms of which address formats it will accept, including \verb|city, state|; \verb|address, city, state, zipcode|; and \verb|address, zipcode|. For certain addresses located in unincorporated areas, the latter seems to perform better. 
+\\ \\
+When reverse geocoding, \verb|MQgeocode| will return a text address at the most granular level available (this will range, in practice, from the zip code level to the exact address.) In either the traditional or reverse geocoding case, the geocoded variable is returned as a single string. If separate latitude and longitude variables are required in the traditional geocoding case, the \verb|outaddress| variable can be split using
+
+\begin{center}
+\verb|split| \textit{latlongvar}\verb|, p(",")|
+\end{center}
+
+\subsection{Example}
+Consider a list of State capitol building addresses, and assume further we are using any information gleaned for good and not evil. If the information originally looks like
+
+
+
+\begin{figure}[ht]
+\begin{center}
+\begin{verbatim}
+                     address          city         state 
+     |---------------------------------------------------|
+  1. |       600 Dexter Ave.    Montgomery       Alabama |
+  2. |           120 4th St.        Juneau        Alaska |
+  3. |    1700 W. Washington       Phoenix       Arizona |
+  4. |    300 W. Markham St.   Little Rock      Arkansas |
+  5. |          1315 10th St    Sacramento    California |
+     |---------------------------------------------------|
+  6. |    200 E. Colfax Ave.        Denver      Colorado |
+  7. |     2210 Capitol Ave.      Hartford   Connecticut |
+  8. |  411 Legislative Ave.         Dover      Delaware |
+  9. |     402 S. Monroe St.   Tallahassee       Florida |
+ 10. | 206 Washington St. SW       Atlanta       Georgia |
+     +---------------------------------------------------+
+\end{verbatim}
+\end{center}
+\end{figure}
+
+Our first step is to create new variable:
+\begin{center}
+\verb|gen capitol = address + "," + city + "," + state|
+\end{center}
+
+And then we can geocode these addresses using: 
+\begin{verbatim}
+. MQgeocode in 1/10, address(capitol) outaddress(coords)
+Observation 1 of 10 geocoded.
+Observation 2 of 10 geocoded.
+...
+\end{verbatim}
+After which we should have latitude and longitudes for each observation:
+\begin{figure}[ht]
+\begin{verbatim}
+                                       capitol                  coords 
+     |-----------------------------------------------------------------|
+  1. |      600 Dexter Ave.,Montgomery,Alabama    32.377588,-86.301882 |
+  2. |               120 4th St.,Juneau,Alaska   58.301945,-134.410453 |
+  3. |         1700 Washington,Phoenix,Arizona   33.448409,-112.045406 |
+  4. | 300 W. Markham St.,Little Rock,Arkansas    34.748601,-92.273452 |
+  5. |      1315 10th St,Sacramento,California   38.576718,-121.494911 |
+     |-----------------------------------------------------------------|
+  6. |      200 E. Colfax Ave.,Denver,Colorado   39.739994,-104.986134 |
+  7. |  2210 Capitol Ave.,Hartford,Connecticut    41.762511,-72.681198 |
+  8. |     411 Legislative Ave.,Dover,Delaware    39.156598,-75.520208 |
+  9. |   402 S. Monroe St.,Tallahassee,Florida    30.437994,-84.280724 |
+ 10. |   206 Washington St. SW,Atlanta,Georgia     33.749747,-84.38857 |
+     +-----------------------------------------------------------------+
+\end{verbatim}
+\end{figure}
+
+\section{The MQtime Command}
+
+\subsection{Syntax}
+
+\verb|MQtime [in], [start_x(|\textit{string}\verb|) start_y(|\textit{string}\verb|) end_x(|\textit{string}\verb|) end_y(|\textit{string}\verb|)| \\\verb| start_add(|\textit{string}\verb|) end_add(|\textit{string}\verb|) api_key(|\textit{string}\verb|) km mode(|\textit{string}\verb|)]|
+
+
+\subsection{Options}
+\verb|start_x(|\textit{string}\verb|), start_y(|\textit{string}\verb|)| specify the variables holding the x, y (i.e. longitude, latitude) coordinates of the \textit{origin} location. Cannot be used with option \verb|start_add|.
+\\ \\
+\verb|end_x(|\textit{string}\verb|), end_y(|\textit{string}\verb|)| specify the variables holding the x, y (i.e. longitude, latitude) coordinates of the \textit{destination} location. Cannot be used with option \verb|end_add|.
+\\ \\
+\verb|start_add(|\textit{string}\verb|)| specifies the variable holding the plain text address of the \textit{origin} location. Cannot be used with options \verb|start_x, start_y|.
+\\ \\
+\verb|end_add(|\textit{string}\verb|)| specifies the variable holding the plain text address of the \textit{destination} location. Cannot be used with options \verb|end_x, end_y|.
+\\ \\
+\verb|api_key(|\textit{string}\verb|)| specifies a user's API key. By default the \verb|MQtime| command will use the built in API key associated with the author. However, if users wish to use their own, they may do so. See comments following for more discussion.
+\\ \\
+\verb|km| specifies whether the distances returned will be in kilometers or not (default is miles.)
+\\ \\
+\verb|mode(|\textit{string}\verb|)| specifies which mode of travel is to be used. Must be one of "walking", "bicycle" or "transit" (the default if unspecified is driving.) 
+\subsection{Comments}
+
+\subsection{Example}
+
+\section{Conclusion}
 
 \end{document}
