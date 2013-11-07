@@ -9,7 +9,7 @@
 
 program MQtime
 	version 11
-	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string)api_key(string) km mode(string)]
+	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string)api_key(string) km mode(string) time(string)]
 	qui {
 		cap which insheetjson
 		if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"
@@ -55,10 +55,10 @@ program MQtime
 		}
 		else if ("`mode'"=="transit"){
 			if ("`km'"==""){
-				local options = "&outFormat='json'&narrativeType=none&routeType=multimodal"
+				local options = "&outFormat='json'&narrativeType=none&routeType=multimodal&timeType=1"
 			}
 			else{
-				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType=multimodal"
+				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType=multimodal&timeType=1"
 			}
 		} 
 		if "`in'" == ""{
