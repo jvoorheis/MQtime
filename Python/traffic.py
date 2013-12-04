@@ -14,6 +14,7 @@ def mapquest_distance(address1, address2, api_key, traffic=False, timeofday="08:
     if traffic==True:
         URL2 = URL2+"&useTraffic=true&timeType=2&dateType="+str(day)+"&localTime="+str(timeofday)
     mapquestResponse = urllib.urlopen(URL2)
+    print URL2
     jsonResponse = json.loads(mapquestResponse.read())
     if jsonResponse['info']['statuscode']==500:
     #Basically, if the OSM API craps out on us, we do the equivalent of 
@@ -52,4 +53,6 @@ try4_gm = getDistance(add3, add4)
 print try3_gm['routes'][0][u'legs'][0][u'duration']['value']
 print try4_gm['routes'][0][u'legs'][0][u'duration']['value']
 
+api_key = "Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz"
+try5 = mapquest_distance(add3, add4, api_key)
 
