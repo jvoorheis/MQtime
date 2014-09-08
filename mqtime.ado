@@ -1,4 +1,4 @@
-*Version 0.3.1 of MQtime (updated 10/30/13)
+*Version 0.3.2 of mqtime (updated 12/6/13)
 *Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup
 *This nods towards TRAVELTIME, written by Adam Ozimek and Daniel Miles in syntax, and very loosely in structure. 
 *This uses the INSHEETJSON library to parse the API requests.
@@ -7,9 +7,9 @@
 *Email jlv@uoregon.edu with any comments or concerns
 
 
-program MQtime
+program mqtime
 	version 11
-	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string)api_key(string) km mode(string) time(string)]
+	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string) api_key(string) km mode(string) time(string)]
 	qui {
 		cap which insheetjson
 		if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"

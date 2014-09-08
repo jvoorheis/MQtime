@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: SJ_writeup.aux
+The style file: plainnat.bst
+Database file #1: SJ_writeup.bib.bib
+Warning--to sort, need author or key in MapquestTOU
+Warning--to sort, need author or key in OSMTOU
+Warning--empty year in MapquestTOU
+Warning--empty year in OSMTOU
+You've used 4 entries,
+            2773 wiz_defined-function locations,
+            615 strings with 5512 characters,
+and the built_in function-call counts, 1269 in all, are:
+= -- 116
+> -- 31
+< -- 2
++ -- 13
+- -- 9
+* -- 87
+:= -- 163
+add.period$ -- 11
+call.type$ -- 4
+change.case$ -- 15
+chr.to.int$ -- 4
+cite$ -- 14
+duplicate$ -- 65
+empty$ -- 143
+format.name$ -- 13
+if$ -- 282
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 1
+newline$ -- 27
+num.names$ -- 8
+pop$ -- 47
+preamble$ -- 1
+purify$ -- 11
+quote$ -- 0
+skip$ -- 57
+stack$ -- 0
+substring$ -- 31
+swap$ -- 5
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 44
+warning$ -- 4
+while$ -- 7
+width$ -- 0
+write$ -- 52
+(There were 4 warnings)

@@ -9,7 +9,9 @@ script.
 
 """
 
-import urllib, json, time
+import urllib, json, time, csv
+
+datafile=""
 
 def timeToHours(time_str):
     """
@@ -77,3 +79,45 @@ def hybrid_distance_full(address1, address2, api_key):
     else:
         return [jsonResponse, "OSM"]
 
+api_key = "Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz"
+
+filelength = len(addresses_merged)
+hybrid_distance_try = [0 for i in range(filelength)]
+driving_time = ["" for i in range(filelength)]
+services = ["" for i in range(filelength)]
+nonzeroind = 0
+mapquest_requests = sum([1 if service=="Mapquest" else 0 for service in services]) 
+
+
+
+
+with open(datafile, 'r') as csvfile:
+    f = csv.reader(csvfile, delimiter=",")
+    addresses = [row for row in f]
+dist_ind = len(addresses[0])
+driv_ind = len(addresses[0])+1
+serv_ind = len(addresses[0])+1
+addresses[0].append("Distance")
+addresses[0].append("DrivingTime")
+addresses[0].append("DirectionsService")
+    
+for i in range(filelength):
+    gd_full = hybrid_distance_full(str(addresses[i][0]), str(addresses[i][1]), api_key)
+    addresses[nonzeroind+i][dist_ind] = gd_full[0]['route']['distance']
+    addresses[nonzeroind+i][driv_ind] = gd_full[1]
+    addresses[nonzeroind+i][serv_ind] = timeToHours(gd_full[0]['route']['formattedTime'])
+    if gd_full[1] == "Mapquest":
+        mapquest_requests +=1
+    if (nonzeroind+i)%20==0:
+        print [nonzeroind+i, gd_full[0]['route']['distance'], 
+               gd_full[0]['route']['formattedTime'], mapquest_requests, timeToHours(gd_full[0]['route']['formattedTime'])]
+    #Dump the lists of distances and services once every hundred iterations
+    if (nonzeroind+i)%100 == 0:
+        f3 = open("driving_dump.json", "wb")
+        json.dump(addresses, f3)
+        f3.close()
+        
+with open("distances_full.csv", 'wb') as csvfile:
+    spamwriter = csv.writer(csvfile, delimiter=',')
+    for i in range(len(addresses)):
+        spamwriter.writerow(addresses[i])
