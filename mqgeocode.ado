@@ -9,7 +9,7 @@
 
 program mqgeocode
 	version 10
-	syntax [in], address(string) [outaddress(string) lat(string) long(string)  api_key(string)]
+	syntax [if] [in], address(string) [outaddress(string) lat(string) long(string)  api_key(string)]
 	cap which insheetjson
 	if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"
 	if _rc == 111 assert 1==2
@@ -25,6 +25,14 @@ program mqgeocode
 		blah=""
 	}*/
 	if "`outaddress'"=="" local outaddress = "coords"
+	cap drop marker
+	gen marker = 0
+	if "`if'" ~= ""{
+		replace marker = 1 `if'
+	}
+	else{
+		replace marker = 1
+	}
 	if "`lat'"!="" & "`long'"!="" & "`address'"==""{
 		*Note: reverse geocoding is deprecated as of version 0.4
 		cap gen str240 `outaddress' = ""
@@ -132,6 +140,7 @@ program mqgeocode
 			
 			if "`in'" == ""{
 				forval i=1/`cnt'{
+					if marker[`i'] == 1{
 					local coords = `address'[`i']
 					local api_request = "`osm_url1'" + "`coords'" + "`options'"
 					local api_request = subinstr("`api_request'", " ", "%20", .)
@@ -157,7 +166,7 @@ program mqgeocode
 						noisily disp "Observation " `i' " of " `cnt' " geocoded using the OpenStreetMaps API."
 					}
 					}
-					 
+					}
 				
 			}
 			else{
@@ -169,6 +178,7 @@ program mqgeocode
 				local cnt = placeholder2[1]
 				drop placeholder placeholder1 placeholder2 
 				forval i = `2'{
+					if marker[`i'] == 1{
 					local coords = `address'[`i']
 					local api_request = "`osm_url1'" + "`coords'" + "`options'"
 					local api_request = subinstr("`api_request'", " ", "%20", .)
@@ -194,6 +204,7 @@ program mqgeocode
 						cap drop temp_lng
 						noisily disp "Observation " `i' " of " `cnt' " geocoded using the OpenStreetMaps API."
 					}
+				}
 				}
 			}
 		}

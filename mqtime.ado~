@@ -1,4 +1,4 @@
-*Version 0.3.2 of mqtime (updated 12/6/13)
+*Version 0.4 of mqtime (updated 9/9/14)
 *Uses the Mapquest OpenStreetMaps API, with the commercial mapquest service as backup
 *This nods towards TRAVELTIME, written by Adam Ozimek and Daniel Miles in syntax, and very loosely in structure. 
 *This uses the INSHEETJSON library to parse the API requests.
@@ -9,7 +9,8 @@
 
 program mqtime
 	version 11
-	syntax [in], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string) api_key(string) km mode(string) time(string)]
+	syntax [in] [if], [start_x(string) start_y(string) end_x(string) end_y(string) start_add(string) end_add(string) api_key(string) km mode(string) time(string)]
+	*di "`if'"
 	qui {
 		cap which insheetjson
 		if _rc == 111 noisily dis as text "Insheetjson.ado not found, please ssc install insheetjson"
@@ -19,10 +20,15 @@ program mqtime
 		if _rc == 111 assert 1==2
 		if ("`start_x'" !="" & "`start_add'"!="") | ("`start_y'"!="" & "`start_add'"!="") {
 			noisily display "Cannot combine options start_add() and start_x() or start_y()" 
-			assert 1==2
+			noisily error 198
 		}
 		if ("`start_x'" =="" & "`start_add'"=="") | ("`start_y'"=="" & "`start_add'"==""){
-		
+		noisily di "You must specify either x,y coordinates or an string address for the origin"
+		noisily error 198
+		}
+		if ("`end_x'" =="" & "`end_add'"=="") | ("`end_y'"=="" & "`end_add'"==""){
+		noisily di "You must specify either x,y coordinates or an string address for the origin"
+		noisily error 198
 		}
 		cap gen travel_time = .
 		cap gen distance = .
@@ -68,11 +74,19 @@ program mqtime
 			else{
 				local options = "&outFormat='json'&narrativeType=none&unit=k&routeType=multimodal&timeType=1"
 			}
-		} 
-		if "`in'" == ""{
+		}
+		gen marker = 0
+		if "`if'" ~= ""{
+			replace marker = 1 `if'
+		}
+		else{
+			replace marker = 1
+		}
+		if "`in'" == "" {
 		local cnt = _N
 		
 		forval i = 1/`cnt'{
+			if marker[`i'] == 1{
 			if "`start_x'"!="" & "`start_add'"==""{
 				local sx = `start_x'[`i']
 				local sy = `start_y'[`i']
@@ -116,7 +130,7 @@ program mqtime
 				replace distance = real(temp_distance[1]) in `i'
 				replace fuelUsed = real(temp_fuel[1]) in `i'
 				cap drop temp_time temp_distance blah1 blah2 blah3 errorcode temp_fuel
-				noisily: di "Processed " `i' " of " `cnt' "using the commercial Mapquest API. (`mapquestcount' total requests this run)"
+				noisily: di "Processed " `i' " of " `cnt' " using the commercial Mapquest API. (`mapquestcount' total requests this run)"
 			}
 
 			else{
@@ -173,6 +187,7 @@ program mqtime
 		}
 		}
 		}
+		}
 		else{
 		tokenize `in'
 		*This is a hacky and terrible way of doing things, I'll clean up later.
@@ -182,7 +197,8 @@ program mqtime
 		local cnt = placeholder2[1]
 		drop placeholder placeholder1 placeholder2
 		*
-		forval i = `2'{ 
+		forval i = `2'{
+			if marker[`i'] == 1{ 
 			if "`start_x'"!="" & "`start_add'"==""{
 				local sx = `start_x'[`i']
 				local sy = `start_y'[`i']
@@ -287,7 +303,9 @@ program mqtime
 			}
 			}
 			}
+			}
 		}
+	drop marker
 		
 	}
 end
