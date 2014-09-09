@@ -16,7 +16,8 @@
 
 {p 8 17 2}
 {cmd:mqtime} {cmd:[in]}{cmd:,}
-{cmd: {start_x(varname) start_y(varname) | start_add(varname) | end_x(varname) end_y(varname) | end_add(varname)}} 
+{cmd: {start_x(varname) start_y(varname) | start_add(varname)}}
+{cmd: {end_x(varname) end_y(varname) | end_add(varname)}} 
 {cmd:[km api_key(string) mode(string")]} 
 
 

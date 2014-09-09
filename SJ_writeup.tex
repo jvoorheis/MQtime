@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage{amsmath,amsfonts,amsthm,amssymb}
 \usepackage{caption}
 \usepackage{graphicx}
@@ -80,7 +80,8 @@ Suppose we think that the distance between state capitol buildings is important 
 \begin{figure}[ht]
 \begin{center}
 \begin{verbatim}
-                     address          city         state 
+     +---------------------------------------------------+
+     |               address          city         state |
      |---------------------------------------------------|
   1. |       600 Dexter Ave.    Montgomery       Alabama |
   2. |           120 4th St.        Juneau        Alaska |
@@ -94,6 +95,7 @@ Suppose we think that the distance between state capitol buildings is important 
   9. |     402 S. Monroe St.   Tallahassee       Florida |
  10. | 206 Washington St. SW       Atlanta       Georgia |
      +---------------------------------------------------+
+
 \end{verbatim}
 \end{center}
 \end{figure}
@@ -106,27 +108,31 @@ Our first step is to create new variable:
 And then we can geocode these addresses using: 
 \begin{verbatim}
 . mqgeocode in 1/10, address(capitol) outaddress(coords)
-Observation 1 of 10 geocoded.
-Observation 2 of 10 geocoded.
+Observation 1 of 10 geocoded using the OpenStreetMaps API.
+Observation 2 of 10 geocoded using the OpenStreetMaps API.
+Observation 3 of 10 geocoded using the commercial Mapquest API. (1 total requests this run)
+
 ...
 \end{verbatim}
 When execution is complete, the data will contain latitude and longitude for each observation:
 \begin{figure}[ht]
 \begin{verbatim}
-                                       capitol                  coords 
-     |-----------------------------------------------------------------|
-  1. |      600 Dexter Ave.,Montgomery,Alabama    32.377588,-86.301882 |
-  2. |               120 4th St.,Juneau,Alaska   58.301945,-134.410453 |
-  3. |         1700 Washington,Phoenix,Arizona   33.448409,-112.045406 |
-  4. | 300 W. Markham St.,Little Rock,Arkansas    34.748601,-92.273452 |
-  5. |      1315 10th St,Sacramento,California   38.576718,-121.494911 |
-     |-----------------------------------------------------------------|
-  6. |      200 E. Colfax Ave.,Denver,Colorado   39.739994,-104.986134 |
-  7. |  2210 Capitol Ave.,Hartford,Connecticut    41.762511,-72.681198 |
-  8. |     411 Legislative Ave.,Dover,Delaware    39.156598,-75.520208 |
-  9. |   402 S. Monroe St.,Tallahassee,Florida    30.437994,-84.280724 |
- 10. |   206 Washington St. SW,Atlanta,Georgia     33.749747,-84.38857 |
-     +-----------------------------------------------------------------+
+      +-----------------------------------------------------------------+
+      |                                 capitol                  coords |
+      |-----------------------------------------------------------------|
+   1. |      600 Dexter Ave.,Montgomery,Alabama    32.377588,-86.301882 |
+   2. |               120 4th St.,Juneau,Alaska   58.301945,-134.410453 |
+   3. |      1700 W. Washington,Phoenix,Arizona   33.448777,-112.093399 |
+   4. | 300 W. Markham St.,Little Rock,Arkansas    34.748601,-92.273452 |
+   5. |      1315 10th St,Sacramento,California   38.576718,-121.494911 |
+      |-----------------------------------------------------------------|
+   6. |      200 E. Colfax Ave.,Denver,Colorado    39.740102,-104.89404 |
+   7. |  2210 Capitol Ave.,Hartford,Connecticut    41.763584,-72.691498 |
+   8. |     411 Legislative Ave.,Dover,Delaware    39.154514,-75.519518 |
+   9. |   402 S. Monroe St.,Tallahassee,Florida    30.437994,-84.280724 |
+  10. |   206 Washington St. SW,Atlanta,Georgia     33.749747,-84.38857 |
+      +-----------------------------------------------------------------+
+ 
 \end{verbatim}
 \end{figure}
 

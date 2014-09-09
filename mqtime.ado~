@@ -22,12 +22,7 @@ program mqtime
 			assert 1==2
 		}
 		if ("`start_x'" =="" & "`start_add'"=="") | ("`start_y'"=="" & "`start_add'"==""){
-		noisily di "You must specify either x,y coordinates or an string address for the origin"
-		assert 1==2
-		}
-		if ("`end_x'" =="" & "`end_add'"=="") | ("`end_y'"=="" & "`end_add'"==""){
-		noisily di "You must specify either x,y coordinates or an string address for the origin"
-		assert 1==2
+		
 		}
 		cap gen travel_time = .
 		cap gen distance = .

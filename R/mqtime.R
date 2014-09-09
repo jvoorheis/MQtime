@@ -24,6 +24,41 @@ mqtime<-function(address1, address2, km=F, full=F){
     return(x1)
   }
 }
+
+mqgeocode<-function(address1, full=F){
+  require(RCurl)
+  require(rjson)
+  if (address1=="Georgia"){
+    address1="Atlanta,Georgia"
+  }
+  URL2 = paste("http://open.mapquestapi.com/geocoding/v1/address?key=",
+               "Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&location=",  address1, "&inFormat=kvp&outFormat='json'", sep="")
+  URL2<-gsub(" ", "+", URL2)
+  x = getURL(URL2)
+  x1 <- fromJSON(x)
+  if (length(x1$results[[1]]$locations)==0){
+    print("Mapquest Backup Service")
+    #print("heck")
+    URL1 <- paste("http://www.mapquestapi.com/geocoding/v1/address?key=",
+                  "Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&location=",  address1, "&inFormat=kvp&outFormat='json'", sep="")
+    URL1<-gsub(" ", "+", URL1)
+    x = getURL(URL1)
+    x1 <- fromJSON(x)
+    latlong <-data.frame("lat" = x1$results[[1]]$locations[[1]]$latLng$lat,
+                "long"=x1$results[[1]]$locations[[1]]$latLng$lng)
+  }
+  else{
+    latlong <-data.frame("lat" = x1$results[[1]]$locations[[1]]$latLng$lat,
+                "long"=x1$results[[1]]$locations[[1]]$latLng$lng)
+  }
+  if (full==F){
+    return(latlong)
+  }
+  else{
+    return(x1)
+  }
+}
+
 try1<-mqtime("Atlanta, Georgia", "Newark, NJ")
 
 

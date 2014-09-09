@@ -1,4 +1,4 @@
-*Version 0.4 of mqgeocode (updated 9/8/14)
+*Version 0.4 of mqgeocode (updated 6/8/14)
 *Reverse and normal geocodes working, more or less
 *Fixed running count display error.
 *Uses the Mapquest OpenStreetMaps API only (no commercial backup)
