@@ -21,14 +21,14 @@
 \title{mqtime: A Stata Tool for Calculating Travel Time and Distance Using Mapquest Web Services}
 \author{John Voorheis\thanks{Thanks to Sonja Kolstoe and Jason Query for providing datasets and testing, and to Trudy Cameron for encouragement and advice. None of this would be possible without the work of Adam Ozimek and Daniel Miles (for writing the original \texttt{traveltime}) and Erik Lindsley (for writing \texttt{insheetjson}). Any errors are my own.}}
 \affil{University of Oregon}
-\date{\today}
+\date{This Version: \today}
 
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This note describes  \verb|mqtime|, a new Stata library which provides functionality to perform a variety of mapping tasks, including calculating travel time, distance (driving, biking or on foot) and estimated fuel use.  \verb|mqtime| uses an overlooked free and open-source mapping service provided by Mapquest. This service has significantly more attractive terms of use than widely used alternatives (e.g. Google Maps), which limit use to a few thousand queries per day. Hence \verb|mqtime| makes analysis with even very large datasets practical. We also provide a convenient function for geocoding character addresses to geographic coordinates (or reverse geocoding geographic coordinates to character addresses.) 
+This note describes  \verb|mqtime|, a new Stata library which provides functionality to perform a variety of mapping tasks, including calculating travel time, distance (driving, biking or on foot) and estimated fuel use.  \verb|mqtime| uses an overlooked free and open-source mapping service provided by Mapquest. This service has significantly more attractive terms of use than widely used alternatives (e.g. Google Maps), which limit use to a few thousand queries per day. Hence \verb|mqtime| makes analysis with even very large datasets practical. We also provide a convenient function for geocoding character addresses to geographic coordinates.
 \end{abstract}
 
 \newpage
@@ -38,17 +38,17 @@ In a variety of applications, the distance between two locations can be a crucia
 \\ \\
 One way to calculate distances is to make use of third-party mapping services. Indeed, the \verb|traveltime| library (written by Adam Ozimek and Daniel Miles) was written to use Google's Maps service. Unfortunately, \verb|traveltime| was written for the now-obsolete v2 of the Google Maps API. Since the Spring 2013 transition to the new Google Maps API v3, \verb|traveltime| has been rendered non-functional. Additionally, before the API change, Google implemented restrictions which severely limited the number of requests that a researcher could make each day. An extension of the \verb|traveltime| library, \verb|traveltime3|, has been written which supports the Google Maps v3 API, but it is still subject to the same rate limits. 
 \\ \\
-\verb|mqtime| is an attempt to provide off-the-shelf travel time calculation functionality without the disadvantages associated with tools that utilize the Google Maps API. This utility takes advantage of a valuable but heretofore overlooked service provided by MapQuest. MapQuest does provide an API that accesses its commercial mapping service (the same service one would access through www.mapquest.com). However, Mapquest also provides a second API which accesses the OpenStreetmaps service. The OpenStreetmaps (OSM) project is a partially crowd-sourced project to produce and maintain a publicly available, open-source street map covering as much of the world as possible. More information about the OSM project can be found at http://www.openstreetmap.org. 
+\verb|mqtime| is an attempt to provide off-the-shelf travel time calculation functionality without the disadvantages associated with tools that utilize the Google Maps API. This utility takes advantage of a valuable but heretofore overlooked service provided by MapQuest. MapQuest provides an API that accesses its commercial mapping service (the same service one would access through www.mapquest.com). However, Mapquest also provides a second API which accesses the OpenStreetmaps service. The OpenStreetmaps (OSM) project is a partially crowd-sourced project to produce and maintain a publicly available, open-source street map covering as much of the world as possible. More information about the OSM project can be found at http://www.openstreetmap.org. 
 \\ \\
 \texttt{mqtime} (and the associated helper function \verb|mqgeocode|) is written to mimic the syntax of \verb|traveltime|, thereby easing the learning curve for users who are already familiar with the \verb|traveltime| tool. However, the under-the-hood functionality of making the API requests and then parsing them into a format that is Stata-readable differs significantly. The \verb|insheetjson| library provides functionality to parse the type of data object (a JSON object) returned by the Mapquest service.\footnote{The Mapquest APIs are written with web-oriented languages like Javascript and Python in mind. It is trivially easy for an experienced programmer to write a Python script which accomplishes the same thing as \texttt{mqtime}, but the goal in this case is to make the information as accessible as possible for general Stata users.} The approach in \verb|mqtime| can be easily extended to make use of other similar API services, which are increasingly provided by companies, and are an underutilized resource for economists. 
 \\ \\
 The chief advantage that \verb|mqtime| offers over the functionality of \verb|traveltime| (and the \verb|traveltime3| successor) is freedom from the strict usage limits imposed by Google. Google places a firm limit of 2,500 API requests (e.g. directions or geocoding) per day per IP address. These limits can be very restrictive, even for medium-sized datasets. A dataset used by one of the testers of \verb|mqtime| involves approximately 500,000 unique address pairs. Processing these data with the Google Maps API would take over six months. The terms of use for the Mapquest APIs are much more permissive. The commercial MapQuest API allows up to 5,000 API requests per day, while the OSM API has no preset limit. By utilizing the Mapquest APIs, \verb|mqtime| allows for the processing of large datasets in reasonable amounts of time.\footnote{In testing, we timed the average request at about 0.5 seconds, most of which is HTTP overhead, so our tester's dataset would require several days to complete.} 
-\\ \\
+
 \section{The \texttt{mqgeocode} Command}
-Although the Openstreetmaps API will take as input either text address information or latitude/longitude coordinates, users may wish to generate latitudes/longitudes from a text address for other purposes (e.g. for calculating simpler straight-line distances or for use within GIS software.) Geocoding of addresses can be accomplished with GIS rather easily, but doing so requires leaving the comfortable confines of Stata. \verb|mqgeocode| is provided as a convenience utility. Like the \verb|mqtime| command (see next section), the \verb|mqgeocode| command will first attempt to geocode using the Openstreetmaps API. If this geocoding fails, \verb|mqgeocode| will then query the commercial Mapquest API. By default,  \verb|mqgeocode| will display a running total of the number of addresses that have been geocoded, as well as the number of requests made to the commercial Mapquest API. Users with data that 
+Although the Openstreetmaps API will take as input either text address information or latitude/longitude coordinates, users may wish to generate latitudes/longitudes from a text address for other purposes (e.g. for calculating simpler straight-line distances or for use within GIS software.) Geocoding of addresses can be accomplished with GIS rather easily, but doing so requires leaving the comfortable confines of Stata. \verb|mqgeocode| is provided as a convenience utility. Like the \verb|mqtime| command (see next section), the \verb|mqgeocode| command will first attempt to geocode using the Openstreetmaps API. If this geocoding fails, \verb|mqgeocode| will then query the commercial Mapquest API. By default,  \verb|mqgeocode| will display a running total of the number of addresses that have been geocoded, as well as the number of requests made to the commercial Mapquest API. 
 
 \subsection{Syntax}
-\verb|mqgeocode [in], [address(string)| $\arrowvert$ \verb| lat(string) long(string)]|\\ \verb|  [outaddress(string) api_key(string)]|
+\verb|mqgeocode [if] [in], {[address(string)| $\arrowvert$ \verb| lat(string) long(string)}|\\ \verb|  [outaddress(string) api_key(string)]|
 
 
 \subsection{Options}
@@ -140,7 +140,7 @@ When execution is complete, the data will contain latitude and longitude for eac
 
 \subsection{Syntax}
 
-\verb|mqtime [in], [start_x(|\textit{string}\verb|) start_y(|\textit{string}\verb|) end_x(|\textit{string}\verb|) end_y(|\textit{string}\verb|)| \\\verb| start_add(|\textit{string}\verb|) end_add(|\textit{string}\verb|) api_key(|\textit{string}\verb|) km mode(|\textit{string}\verb|)]|
+\verb|mqtime [if] [in], {start_x(|\textit{string}\verb|)  start_y(|\textit{string}\verb|)  end_x(|\textit{string}\verb|)  end_y(|\textit{string}\verb|)| $\arrowvert$ \\\verb| start_add(|\textit{string}\verb|) end_add(|\textit{string}\verb|)} [api_key(|\textit{string}\verb|) km mode(|\textit{string}\verb|)]|
 
 
 \subsection{Options}
@@ -160,7 +160,7 @@ When execution is complete, the data will contain latitude and longitude for eac
 \subsection{Comments}
 By default \verb|mqtime| will first attempt to query the Mapquest OSM API for each origin/destination pair. As noted earlier, the OSM service has no pre-set rate limit, and is therefore much more amenable to the processing of large datasets. However, it does have slightly less coverage than the commercial mapping alternatives.\footnote{In testing, I found that the OSM failed to generate a route for approximately 2\% of origin/destination pairs.} The commercial Mapquest API has considerably better coverage, although it does have stricter usage limits. By default, \verb|mqtime| will query the commercial Mapquest API only if it receives a route failure error from the OSM API. 
 \\ \\
-By default, \verb|mqtime| will also use the API key associated with the author of this note (Voorheis). This means, however  that all requests to the commercial API will be pooled for all users. If users find themselves needing to make a relatively large number of requests for which the OSM service fails, it may be advantageous to request a separate API key. Noncommercial API keys are free, and can be requested at the Mapquest developer site.\footnote{http://developer.mapquest.com/web/info/account/app-keys} To make sure \verb|mqtime| employs a user's own API key, the \verb|api_key| option must be specified. The actual API key is a long, randomly generated string, so it may be easiest to attach it to a local macro, for instance:
+By default, \verb|mqtime| will also use the API key associated with the author of this note (Voorheis). This means, however, that all requests to the commercial API will be pooled for all users. If users find themselves needing to make a relatively large number of requests for which the OSM service fails, it may be advantageous to request a separate API key. Noncommercial API keys are free, and can be requested at the Mapquest developer site.\footnote{http://developer.mapquest.com/web/info/account/app-keys} To make sure \verb|mqtime| employs a user's own API key, the \verb|api_key| option must be specified. The actual API key is a long, randomly generated string, so it may be easiest to attach it to a local macro, for instance:
 \begin{center}
 \verb|local api_key = "|\textit{your\_key\_here}\verb|"|
 \end{center}
@@ -181,8 +181,8 @@ The other options are largely self-explanatory, with the exceptions of the \verb
 \verb|mqtime| will by default create four new variables \verb|travel_time, distance, fuelUsed, service|. Travel time is returned in minutes by default, and distance is returned in miles (or kilometers if \verb|km| is specified). The estimated fuel use variable is generated based on Mapquest's estimate of fuel use in gallons for the trip.\footnote{As of now, the fuel use estimate is returned as the Mapquest default (based on ). It is possible to supply the Mapquest API with specific fuel efficiency assumptions, but this is not yet implemented in \texttt{mqtime}.} The OSM API returns the fastest route based on posted speed limits, but does not take into account realtime traffic information. The commercial Mapquest API can give traffic-adjusted travel time, but this is not yet built into \verb|mqtime|.
 
 \subsection{Examples}
-First, we can return to the state capitol building example to illustrate how \verb|mqtime| can query the API to obtain driving directions from text addresses. Suppose we want to generate directions from the 10 state capitol buildings used in the previous example to 10 other arbitrarily matched capitol buildings. Our data then look like:
-\begin{figure}[ht]
+First, we can return to the state capitol building example to illustrate how \verb|mqtime| can query the API to obtain driving directions from text addresses. Suppose we want to generate directions from the 10 state capitol buildings used in the previous example to 10 other arbitrarily matched capitol buildings. The first five rows of our data data then look like:
+\begin{figure}[htbp]
 {\footnotesize
 \begin{verbatim}
      +-------------------------------------------------------------------------------------+
@@ -190,16 +190,10 @@ First, we can return to the state capitol building example to illustrate how \ve
      |-------------------------------------------------------------------------------------|
   1. |      600 Dexter Ave.,Montgomery,Alabama        488 N 3rd St,Harrisburg,Pennsylvania |
   2. |               120 4th St.,Juneau,Alaska        82 Smith St.,Providence,Rhode Island |
-  3. |         1700 Washington,Phoenix,Arizona    1100 Gervais St.,Columbia,South Carolina |
+  3. |      1700 W. Washington,Phoenix,Arizona    1100 Gervais St.,Columbia,South Carolina |
   4. | 300 W. Markham St.,Little Rock,Arkansas      500 E. Capitol Ave,Pierre,South Dakota |
   5. |      1315 10th St,Sacramento,California       600 Charlotte Ave,Nashville,Tennessee |
      |-------------------------------------------------------------------------------------|
-  6. |      200 E. Colfax Ave.,Denver,Colorado           1100 N. Congress Ave,Austin,Texas |
-  7. |  2210 Capitol Ave.,Hartford,Connecticut         350 N. State St,Salt Lake City,Utah |
-  8. |     411 Legislative Ave.,Dover,Delaware             115 State St,Montpelier,Vermont |
-  9. |   402 S. Monroe St.,Tallahassee,Florida             1000 Bank St.,Richmond,Virginia |
- 10. |   206 Washington St. SW,Atlanta,Georgia   416 Sid Snyder Ave. SW,Olympia,Washington |
-     +-------------------------------------------------------------------------------------+
 \end{verbatim}
 }
 \end{figure}
@@ -207,38 +201,34 @@ First, we can return to the state capitol building example to illustrate how \ve
 To generate the driving time, etc, we can then execute
 \begin{center}
 \begin{verbatim}
-mqtime, start_add(capitol_origin) end_add(capitol_destination)
-Processed 1 of 10
-Processed 2 of 10
+. mqtime, start_add(capitol_origin) end_add(capitol_destination)
+Processed 1 of 10 using the OpenStreetMaps API.
+Processed 2 of 10 using the OpenStreetMaps API.
+Processed 3 of 10 using the commercial Mapquest API. (1 total requests this run)
 ...
-Processed 10 of 10
+Processed 10 of 10 using the OpenStreetMaps API.
 \end{verbatim}
 \end{center}
-When execution is complete we can check that \verb|mqtime| has generated the correct data; we can see that all of the routes were mapped without error, and none required the backup commercial Mapquest API.
+When execution is complete we can check that \verb|mqtime| has generated the correct data; we can see that all of the routes were mapped without error, and only one required the backup commercial Mapquest API. 
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \begin{center}
 {\footnotesize
 \begin{verbatim}
-     +------------------------------------------+
-     |travel_time distance   fuelUsed   service |
-     |------------------------------------------|
-  1. |   816.05    882.256      42.06       OSM |
-  2. | 4559.617   4208.583     187.13       OSM |
-  3. |  1917.85   2057.966      96.07       OSM |
-  4. |   929.15    1004.32      47.94       OSM |
-  5. | 1996.067   2279.258     114.96       OSM |
-     |------------------------------------------|
-  6. | 939.3834   1061.885      53.38       OSM |
-  7. |   2041.8   2275.139     111.56       OSM |
-  8. | 477.6333   476.2961      21.58       OSM |
-  9. |      713    760.513      35.63       OSM |
- 10. | 2458.733   2712.527     130.95       OSM |
-     +------------------------------------------+
+     +-------------------------------------------+
+     | travel~e   distance   fuelUsed    service |
+     |-------------------------------------------|
+  1. | 804.4833    882.407      42.04        OSM |
+  2. | 5195.117   3963.791     159.62        OSM |
+  3. | 1844.633    2064.94      99.16   Mapquest |
+  4. |    913.3   1004.539       48.3        OSM |
+  5. |  1952.55   2274.824     116.32        OSM |
+     |-------------------------------------------|
 \end{verbatim}
 }
 \end{center}
 \end{figure}
+\clearpage
 
 \section{Conclusion}
 Taking advantage of \verb|insheetjson|'s ability to parse JSON files (the industry standard of data provision from an API) we have shown how to generate travel times, distances and estimated fuel use. This is accomplished by using a convenient but under-utilized service provided by Mapquest. Unlike previous implementations, \verb|mqtime| can process even very large datasets without running afoul of commercial entities' terms of use. \verb|mqtime| can also be easily patched to stay up to date with API changes. 

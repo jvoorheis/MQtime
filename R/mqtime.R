@@ -59,10 +59,10 @@ mqgeocode<-function(address1, full=F){
   }
 }
 
-try1<-mqtime("Atlanta, Georgia", "Newark, NJ")
+#try1<-mqtime("Atlanta, Georgia", "Newark, NJ")
 
-
-
-URL1 <- "http://open.mapquestapi.com/directions/v2/routematrix?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=Detroit,MI&to=Atlanta,GA&to=Athens,GA&allToAll=True"
-x <- getURL(URL1)
-x <- fromJSON(x)
+# 
+# 
+# URL1 <- "http://open.mapquestapi.com/directions/v2/routematrix?key=Fmjtd%7Cluub2huanl%2C20%3Do5-9uzwdz&from=Detroit,MI&to=Atlanta,GA&to=Athens,GA&allToAll=True"
+# x <- getURL(URL1)
+# x <- fromJSON(x)

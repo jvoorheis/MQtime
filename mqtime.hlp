@@ -15,7 +15,7 @@
 {title:Syntax}
 
 {p 8 17 2}
-{cmd:mqtime} {cmd:[in]}{cmd:,}
+{cmd:mqtime}  {cmd: [if]} {cmd:[in]}  {cmd:,}
 {cmd: {start_x(varname) start_y(varname) | start_add(varname) | end_x(varname) end_y(varname) | end_add(varname)}} 
 {cmd:[km api_key(string) mode(string")]} 
 
@@ -32,9 +32,9 @@
 
 
 
-{title:Options}
+{title:Required Options}
 
-{phang} {cmd:start_x(}{it:varname}{cmd:)} and {cmd:start_y(}{it:varname}{cmd:)} specify the longitude (x) and latitude (y), in degrees, of the origin location. Cannot be used with option {cmd: start_add}.
+{phang} {cmd:start_x(}{it:varname}{cmd:)} and {cmd:start_y(}{it:varname}{cmd:)} specify the longitude (x) and latitude (y), in degrees, of the origin location. Cannot be used with option {cmd: start_add}. 
 
 {phang} {cmd:end_x(}{it:varname}{cmd:)} and {cmd:end_y(}{it:varname}{cmd:)} specify the longitude (x) and latitude (y), in degrees, of the destination location. Cannot be used with option {cmd: end_add}.
 
@@ -44,9 +44,11 @@ cation. Cannot be used with options {cmd:start_x}, {cmd:start_y}.
 {phang} {cmd:end_add(}{it:varname}{cmd:)} specifies the variable holding the plain text address of the destination lo-
 cation. Cannot be used with options {cmd:end_x}, {cmd:end_y}.
 
+{title:Additional Options}
+
 {phang} {cmd:km} will request distances in kilometers from the API (optional)
 
-{phang} {cmd:api_key(}{it:string}{cmd:)} will use a user-supplied Mapquest API key in place of the built in key.
+{phang} {cmd:api_key(}{it:string}{cmd:)} will use a user-supplied Mapquest API key in place of the built in key. Necessary only if users need to make many API requests using the commercial Mapquest API. (Mapquest keys can be requested here: {url: http://developer.mapquest.com/web/products/quick_start)}
 
 {phang} {cmd:mode(}{it:string}{cmd:)} specifies which mode of travel is to be used. Must be one of ”walking”, ”bicycle” or ”transit” (the default is driving if unspecified.)
 

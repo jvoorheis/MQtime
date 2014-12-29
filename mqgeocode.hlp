@@ -14,7 +14,7 @@
 {title:Syntax}
 
 {p 8 17 2}
-{cmd:mqgeocode} {cmd:[in]}{cmd:,} 
+{cmd:mqgeocode} {cmd: [if]} {cmd:[in]}  {cmd:,} 
 {cmd: {address(string) | lat(string) long(string)}} {cmd: [outaddress(string) api_key(string)]}
 
 
@@ -29,7 +29,7 @@
 
 
 
-{title:Options}
+{title:Required Options}
 
 {phang} {cmd: address(}{it:varname}{cmd:)} specifies the variable holding the text addresses to be geocoded. Cannot be used with options {cmd:lat} and {cmd:long}
 
@@ -37,9 +37,10 @@
 
 {phang} {cmd: long(}{it:string}{cmd:)} specifies the variable holding the longitude to be reverse geocoded. Must be used with option {cmd:lat} and cannot be used with options {cmd:address}
 
-{phang} {cmd: outaddress(}{it:string}{cmd:)} specifies the variable name of the geocoded/reverse geocoded address parsed from the API request.
+{title: Additional Options}
+{phang} {cmd: outaddress(}{it:string}{cmd:)} specifies the variable name of the geocoded/reverse geocoded address parsed from the API request. If unspecified, will default to {it: coords}
 
-{phang} {cmd: api_key(}{it:string}{cmd:)} specifies a user-specific Mapquest API key.
+{phang} {cmd: api_key(}{it:string}{cmd:)} specifies a user-specific Mapquest API key. Necessary only if users need to make many API requests using the commercial Mapquest API. (Mapquest keys can be requested here: http://developer.mapquest.com/web/products/quick_start)
 
 {marker examples}{...}
 {title:Examples}

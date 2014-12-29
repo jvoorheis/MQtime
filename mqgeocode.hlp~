@@ -14,7 +14,7 @@
 {title:Syntax}
 
 {p 8 17 2}
-{cmd:mqgeocode} {cmd:[in]}{cmd:,} 
+{cmd:mqgeocode} {cmd:[in]} {cmd: [if]} {cmd:,} 
 {cmd: {address(string) | lat(string) long(string)}} {cmd: [outaddress(string) api_key(string)]}
 
 
@@ -23,13 +23,13 @@
 {title:Description}
 {p 4 4 2} Although the Openstreetmaps API will take as input either text address information or latitude/longitude coordinates to request driving directions, users may wish to generate latitudes/longitudes from a text address for other purposes (e.g. for calculating simpler straight-line distances or for use within GIS software.) Geocoding of addresses can be accomplished with GIS rather easily, but doing so requires leaving the comfortable confines of Stata. {cmd:mqgeocode} is provided as a convenience utility. Like the  {help mqtime: mqtime} command (see next section), the  {cmd:mqgeocode} command will first attempt to geocode using the Openstreetmaps API. If this geocoding fails, {cmd:mqgeocode} will then query the commercial Mapquest API. By default,  {cmd:mqgeocode} will display a running total of the number of addresses that have been geocoded, as well as the number of requests made to the commercial Mapquest API. Users with data that 
 
-{p 4 4 2} {cmd:mqgeocode} depends on two user written Stata libraries, {help libjson:libjson} and {help insheetjson: insheetjson}, for the processing of the JSON objects returned by the Mapquest API. These will need to be installed before using either  {cmd:mqtime} or {cmd:mqgeocode}, which can be be done via ssc by  {ssc: ssc install insheetjson} and -ssc install libjson-
+{p 4 4 2} {cmd:mqgeocode} depends on two user written Stata libraries, {help libjson:libjson} and {help insheetjson: insheetjson}, for the processing of the JSON objects returned by the Mapquest API. These will need to be installed before using either  {cmd:mqtime} or {cmd:mqgeocode}, which can be be done via ssc by  -ssc install insheetjson- and -ssc install libjson-
 
 
 
 
 
-{title:Options}
+{title:Required Options}
 
 {phang} {cmd: address(}{it:varname}{cmd:)} specifies the variable holding the text addresses to be geocoded. Cannot be used with options {cmd:lat} and {cmd:long}
 
@@ -37,9 +37,10 @@
 
 {phang} {cmd: long(}{it:string}{cmd:)} specifies the variable holding the longitude to be reverse geocoded. Must be used with option {cmd:lat} and cannot be used with options {cmd:address}
 
-{phang} {cmd: outaddress(}{it:string}{cmd:)} specifies the variable name of the geocoded/reverse geocoded address parsed from the API request.
+{title: Additional Options}
+{phang} {cmd: outaddress(}{it:string}{cmd:)} specifies the variable name of the geocoded/reverse geocoded address parsed from the API request. If unspecified, will default to {it: coords}
 
-{phang} {cmd: api_key(}{it:string}{cmd:)} specifies a user-specific Mapquest API key.
+{phang} {cmd: api_key(}{it:string}{cmd:)} specifies a user-specific Mapquest API key. Necessary only if users need to make many API requests using the commercial Mapquest API. (Mapquest keys can be requested here: http://developer.mapquest.com/web/products/quick_start)
 
 {marker examples}{...}
 {title:Examples}

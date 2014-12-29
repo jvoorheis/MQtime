@@ -25,7 +25,7 @@ program mqgeocode
 		blah=""
 	}*/
 	if "`outaddress'"=="" local outaddress = "coords"
-	cap drop marker
+	cap drop 
 	gen marker = 0
 	if "`if'" ~= ""{
 		replace marker = 1 `if'
@@ -210,6 +210,7 @@ program mqgeocode
 		}
 		
 	}
+	cap drop marker
 	
 end
 
